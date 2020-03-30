@@ -1,0 +1,68 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+- feature/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  major: 0
+  minor: 1
+
+stages:
+- stage:
+  displayName: Versioning
+  jobs:
+  - job: VersionNonMaster
+    displayName: Set version (non-master)
+    condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
+    variables:
+       prpatch: $[counter(variables['system.pullrequest.pullrequestid'], 0)]
+       brpatch: $[counter(variables['build.sourcebranchname'], 0)]
+    steps:
+      - bash: |
+           echo "##vso[build.updatebuildnumber]$(major).$(minor)-PullRequest.$(prpatch)"
+        condition: eq(variables['Build.Reason'], 'PullRequest')
+        name: SetPRBuildName
+      - bash: |
+           echo "##vso[build.updatebuildnumber]$(major).$(minor)-$(Build.SourceBranchName).$(brpatch)"
+        condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
+        name: SetBranchBuildName
+  - job: VersionMaster
+    displayName: Set version (master)
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    variables:
+       patch: $[counter(variables['minor'], 0)]
+    steps:
+      - bash: |
+           echo "##vso[build.updatebuildnumber]$(major).$(minor).$(patch)"
+        name: SetMasterBuildName
+        
+- stage: Build
+  displayName: Build & package
+  condition: always()
+  jobs:  
+  - job: Build
+    displayName: Build, test and publish
+    steps:   
+      - script: dotnet publish --configuration $(buildConfiguration) --output ./publish
+        displayName: 'dotnet publish $(buildConfiguration)'
+      - script: dotnet test --configuration $(buildConfiguration)
+        displayName: 'dotnet test $(buildConfiguration)'
+      - script: docker build . -t docker.pkg.github.com/geeksync-org/geeksync-server/geeksync-server:$(Build.BuildNumber)
+        displayName: 'Doker build'
+#      - task: Docker@2
+#        displayName: Docker push
+#        enabled: false
+#        inputs:
+#          containerRegistry: 'github-docker'
+#          repository: 'geeksync-org/geeksync-server/geeksync-server'
+#          command: 'push'
+#          tags: '$(Build.BuildNumber)'
+      
