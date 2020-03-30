@@ -6,5 +6,5 @@ EXPOSE 443
 
 FROM base AS final
 WORKDIR /app
-COPY publish/GeekSyncServer .
+COPY geeksync-server .
 ENTRYPOINT ["dotnet", "GeekSyncServer.dll"]

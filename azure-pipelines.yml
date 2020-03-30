@@ -51,18 +51,23 @@ stages:
   - job: Build
     displayName: Build, test and publish
     steps:   
-      - script: dotnet publish --configuration $(buildConfiguration) --output ./publish
-        displayName: 'dotnet publish $(buildConfiguration)'
-      - script: dotnet test --configuration $(buildConfiguration)
-        displayName: 'dotnet test $(buildConfiguration)'
-      - script: docker build . -t docker.pkg.github.com/geeksync-org/geeksync-server/geeksync-server:$(Build.BuildNumber)
-        displayName: 'Doker build'
-#      - task: Docker@2
-#        displayName: Docker push
-#        enabled: false
-#        inputs:
-#          containerRegistry: 'github-docker'
-#          repository: 'geeksync-org/geeksync-server/geeksync-server'
-#          command: 'push'
-#          tags: '$(Build.BuildNumber)'
+      - script: dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/geeksync-server GeekSyncServer/GeekSyncServer.csproj
+        displayName: 'Build and publish'
+      - task: DotNetCoreCLI@2
+        displayName: Unit test
+        continueOnError: false
+        inputs:
+          command: 'test'
+          testRunTitle: 'Unit test'
+      - task: CopyFiles@2
+        displayName: Copy Dockerfile
+        inputs:
+          contents: Dockerfile
+          targetFolder: $(Build.ArtifactStagingDirectory)
+      - task: PublishBuildArtifacts@1
+        displayName: Piublish artifacts
+        inputs:
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+          artifactName: 'drop' 
+
       
