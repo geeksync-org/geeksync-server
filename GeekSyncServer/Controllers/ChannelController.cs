@@ -45,8 +45,7 @@ namespace GeekSyncServer.Controllers
             else
             {
                 await channel.SentToAllDesktops(payload.Message);
-                //TODO: AB#47 / AB#48
-                return Ok();
+                return Ok(new ChannelInfo(channel));
             }
             
 
