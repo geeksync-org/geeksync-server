@@ -23,7 +23,6 @@ stages:
   jobs:
   - job: VersionNonMaster
     displayName: Set version
-    
     variables:
        prpatch: $[counter(variables['system.pullrequest.pullrequestnumber'], 0)]
        brpatch: $[counter(variables['build.sourcebranchname'], 0)]
@@ -42,7 +41,6 @@ stages:
   jobs:        
   - job: VersionMaster
     displayName: Set version
-    
     variables:
        patch: $[counter(variables['minor'], 0)]
     steps:
