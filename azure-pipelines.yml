@@ -41,7 +41,6 @@ stages:
   jobs:        
   - job: VersionMaster
     displayName: Set version
-    
     variables:
        patch: $[counter(variables['minor'], 0)]
     steps:
