@@ -72,7 +72,7 @@ stages:
           contents: Dockerfile
           targetFolder: $(Build.ArtifactStagingDirectory)
       - task: PublishBuildArtifacts@1
-        displayName: Piublish artifacts
+        displayName: Publish artifacts
         inputs:
           pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
           artifactName: 'drop' 
