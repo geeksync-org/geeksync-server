@@ -4,46 +4,52 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- master
-- feature/*
-
-pool:
-  vmImage: 'ubuntu-latest'
-
-variables:
-  buildConfiguration: 'Release'
-  major: 0
-  minor: 1
-
-stages:
-- stage:
-  displayName: Versioning
-  jobs:
-  - job: VersionNonMaster
-    displayName: Set version (non-master)
+  - master
+  - feature/*
+  - bugfix/*
+  
+  pool:
+    vmImage: 'ubuntu-latest'
+  
+  variables:
+    buildConfiguration: 'Release'
+    major: 0
+    minor: 1
+  
+  stages:
+  - stage:
+    displayName: Versioning (non-master)
     condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
-    variables:
-       prpatch: $[counter(variables['system.pullrequest.pullrequestid'], 0)]
-       brpatch: $[counter(variables['build.sourcebranchname'], 0)]
-    steps:
-      - bash: |
-           echo "##vso[build.updatebuildnumber]$(major).$(minor)-PullRequest.$(prpatch)"
-        condition: eq(variables['Build.Reason'], 'PullRequest')
-        name: SetPRBuildName
-      - bash: |
-           echo "##vso[build.updatebuildnumber]$(major).$(minor)-$(Build.SourceBranchName).$(brpatch)"
-        condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
-        name: SetBranchBuildName
-  - job: VersionMaster
-    displayName: Set version (master)
+    jobs:
+    - job: VersionNonMaster
+      displayName: Set version
+      
+      variables:
+         prpatch: $[counter(variables['system.pullrequest.pullrequestnumber'], 0)]
+         brpatch: $[counter(variables['build.sourcebranchname'], 0)]
+      steps:
+        - bash: |
+             echo "##vso[build.updatebuildnumber]$(major).$(minor)-PullRequest-$(System.PullRequest.PullRequestNumber).$(prpatch)"
+          condition: eq(variables['Build.Reason'], 'PullRequest')
+          name: SetPRBuildName
+        - bash: |
+             echo "##vso[build.updatebuildnumber]$(major).$(minor)-$(Build.SourceBranchName).$(brpatch)"
+          condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
+          name: SetBranchBuildName
+  - stage:
+    displayName: Versioning (master)
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
-    variables:
-       patch: $[counter(variables['minor'], 0)]
-    steps:
-      - bash: |
-           echo "##vso[build.updatebuildnumber]$(major).$(minor).$(patch)"
-        name: SetMasterBuildName
-        
+    jobs:        
+    - job: VersionMaster
+      displayName: Set version
+      
+      variables:
+         patch: $[counter(variables['minor'], 0)]
+      steps:
+        - bash: |
+             echo "##vso[build.updatebuildnumber]$(major).$(minor).$(patch)"
+          name: SetMasterBuildName
+            
 - stage: Build
   displayName: Build & package
   condition: always()
