@@ -45,7 +45,7 @@ namespace GeekSyncServer.Controllers
             else
             {
                 await channel.SentToAllDesktops(payload.Message);
-                return Ok();
+                return Ok(new ChannelInfo(channel));
             }
             
 
