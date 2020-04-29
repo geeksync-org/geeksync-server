@@ -35,7 +35,7 @@ namespace GeekSyncServer
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "sync-service API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "geeksync-server API", Version = "0.2" });
             });
         }
 
@@ -76,15 +76,14 @@ namespace GeekSyncServer
                             WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
                             string[] path=context.Request.Path.ToString().Split('/');
-                            string pairing=path[2];
-                            string desktop=path[3];
-
+                            string channelID=path[2];
+                            
                             try
                             {
-                                Channel channel=ChannelManager.Instance[Guid.Parse(pairing)];
+                                Channel channel=ChannelManager.Instance[Guid.Parse(channelID)];
                                 if (channel!=null) 
                                 {
-                                    await channel.ConnectWebSocket(Guid.Parse(desktop),webSocket);
+                                    await channel.ConnectWebSocket(webSocket);
                                 }
                                 else
                                 {
@@ -95,18 +94,7 @@ namespace GeekSyncServer
                             {
                                 context.Response.StatusCode = 400;
                             }
-                            catch(DesktopNotConnectedException)
-                            {
-                                context.Response.StatusCode = 404;
-                            }
-                            catch(DesktopWebSocketAlreadyConnectedException)
-                            {
-                                context.Response.StatusCode = 400;
-                            }
-                            catch(DesktopWebSocketException)
-                            {
-                                context.Response.StatusCode = 500;
-                            }
+                       
                         }
                         else
                         {
@@ -124,7 +112,7 @@ namespace GeekSyncServer
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "sync-service API V1");
+                c.SwaggerEndpoint("/swagger/v0.2/swagger.json", "geeksync-server API v.0.2");
             });
 
         }

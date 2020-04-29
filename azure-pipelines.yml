@@ -14,10 +14,10 @@ pool:
 variables:
   buildConfiguration: 'Release'
   major: 0
-  minor: 1
+  minor: 2
 
 stages:
-- stage:
+- stage: versionNonMaster
   displayName: Versioning (non-master)
   condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
   jobs:
@@ -35,7 +35,7 @@ stages:
            echo "##vso[build.updatebuildnumber]$(major).$(minor)-$(Build.SourceBranchName).$(brpatch)"
         condition: and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
         name: SetBranchBuildName
-- stage:
+- stage: versionMaster
   displayName: Versioning (master)
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
   jobs:        
