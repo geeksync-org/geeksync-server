@@ -35,7 +35,7 @@ namespace GeekSyncServer
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "sync-service API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "geeksync-server API", Version = "0.2" });
             });
         }
 
@@ -124,7 +124,7 @@ namespace GeekSyncServer
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "sync-service API V1");
+                c.SwaggerEndpoint("/swagger/v0.2/swagger.json", "geeksync-server API v.0.2");
             });
 
         }
