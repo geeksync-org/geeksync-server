@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using GeekSyncServer.Internal;
-using GeekSyncServer.Model;
+
 
 
 namespace GeekSyncServer.Controllers
@@ -24,28 +24,57 @@ namespace GeekSyncServer.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{pairingID}")]
-        public ChannelInfo Get(Guid pairingID)
+        [HttpGet("{channelID}")]
+        public ActionResult Get(Guid channelID)
         {
-            return new ChannelInfo(ChannelManager.Instance[pairingID]);
-        }
-
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<ChannelInfo>> Send(MessagePayload payload)
-        {
-
-            Channel channel=ChannelManager.Instance[payload.PairingID];
+            Channel channel=ChannelManager.Instance[channelID];
             if (channel==null)
             {
                 return NotFound();
             }
             else
             {
-                await channel.SentToAllDesktops(payload.Message);
-                return Ok(new ChannelInfo(channel));
+                return Ok("OK");
+            }
+        }
+
+
+        [HttpPut("{channelID}")]
+        public ActionResult<string> Register(Guid channelID)
+        {
+            Channel channel = ChannelManager.Instance[channelID];
+            if (channel == null)
+            {
+                ChannelManager.Instance.CreateChannel(channelID);
+            }
+            return Ok("OK");
+        }
+
+        [HttpDelete("{channelID}")]
+        public ActionResult<string> UnRegister(Guid channelID)
+        {
+            ChannelManager.Instance.DeleteChannel(channelID);
+            return Ok("OK");
+        }
+
+
+
+        [HttpPost("{channelID}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<string>> Send(Guid ChannelID, string message)
+        {
+
+            Channel channel=ChannelManager.Instance[ChannelID];
+            if (channel==null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                await channel.SendToReceiver(message);
+                return Ok("OK");
             }
             
 

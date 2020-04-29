@@ -24,17 +24,18 @@ namespace GeekSyncServer.Internal
         {
             get
             {
-                return channelList.SingleOrDefault(x => x.PairingID == index);
+                return channelList.SingleOrDefault(x => x.ChannelID == index);
             }
         }
 
-        public Channel CreateChannel(Guid pairingID)
-        {
-            if (this[pairingID]==null)
-            {
-                Channel n=new Channel(pairingID);
-                channelList.Add(n);
 
+
+        public Channel CreateChannel(Guid channelID)
+        {
+            if (this[channelID]==null)
+            {
+                Channel n=new Channel(channelID);
+                channelList.Add(n);
                 return n;
             }
             else
@@ -43,9 +44,9 @@ namespace GeekSyncServer.Internal
             }
         }
 
-        public void DeleteChannel(Guid pairingID)
+        public void DeleteChannel(Guid channelID)
         {
-            Channel inst=this[pairingID];
+            Channel inst=this[channelID];
             if (inst!=null) DeleteChannel(inst);
         }
 

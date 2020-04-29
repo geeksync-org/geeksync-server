@@ -76,15 +76,14 @@ namespace GeekSyncServer
                             WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
                             string[] path=context.Request.Path.ToString().Split('/');
-                            string pairing=path[2];
-                            string desktop=path[3];
-
+                            string channelID=path[2];
+                            
                             try
                             {
-                                Channel channel=ChannelManager.Instance[Guid.Parse(pairing)];
+                                Channel channel=ChannelManager.Instance[Guid.Parse(channelID)];
                                 if (channel!=null) 
                                 {
-                                    await channel.ConnectWebSocket(Guid.Parse(desktop),webSocket);
+                                    await channel.ConnectWebSocket(webSocket);
                                 }
                                 else
                                 {
