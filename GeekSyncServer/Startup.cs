@@ -94,18 +94,7 @@ namespace GeekSyncServer
                             {
                                 context.Response.StatusCode = 400;
                             }
-                            catch(DesktopNotConnectedException)
-                            {
-                                context.Response.StatusCode = 404;
-                            }
-                            catch(DesktopWebSocketAlreadyConnectedException)
-                            {
-                                context.Response.StatusCode = 400;
-                            }
-                            catch(DesktopWebSocketException)
-                            {
-                                context.Response.StatusCode = 500;
-                            }
+                       
                         }
                         else
                         {

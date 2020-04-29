@@ -42,7 +42,8 @@ namespace GeekSyncServer.Internal
             }
             catch (Exception e)
             {
-                throw new DesktopWebSocketException(e);
+                //throw new DesktopWebSocketException(e);
+                throw e;
             }
             
 
