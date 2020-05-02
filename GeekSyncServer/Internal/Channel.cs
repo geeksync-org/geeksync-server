@@ -22,13 +22,13 @@ namespace GeekSyncServer.Internal
         }
         public async Task ConnectWebSocket(WebSocket webSocket)
         {
-            if (webSocket!=null)
+            if (webSocket != null)
             {
                 // so, we already have one. For now, we just close it...
                 // TODO: check how to close...
-                await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure,"Closing...",new CancellationTokenSource().Token);
+                await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing...", new CancellationTokenSource().Token);
             }
-            this.webSocket=webSocket;
+            this.webSocket = webSocket;
             try
             {
                 var buffer = new byte[1024 * 4];
@@ -45,7 +45,7 @@ namespace GeekSyncServer.Internal
                 //throw new DesktopWebSocketException(e);
                 throw e;
             }
-            
+
 
         }
 
@@ -53,8 +53,11 @@ namespace GeekSyncServer.Internal
         public async Task SendToReceiver(string message)
         {
             //TODO: implement true buffer size alignment and not limit to 4000 bytes!
-            byte[] bytes=Encoding.UTF8.GetBytes(message);
-            await webSocket.SendAsync(new ArraySegment<byte>(bytes, 0, bytes.Length>4000?4000:bytes.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+            if (webSocket != null)
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(message);
+                await webSocket.SendAsync(new ArraySegment<byte>(bytes, 0, bytes.Length > 4000 ? 4000 : bytes.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+            }
         }
     }
 }

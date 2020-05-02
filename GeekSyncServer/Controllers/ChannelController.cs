@@ -64,10 +64,10 @@ namespace GeekSyncServer.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<string>> Send(Guid ChannelID, string message)
+        public async Task<ActionResult<string>> Send(Guid channelID, [FromBody] string message)
         {
 
-            Channel channel=ChannelManager.Instance[ChannelID];
+            Channel channel=ChannelManager.Instance[channelID];
             if (channel==null)
             {
                 return NotFound();
