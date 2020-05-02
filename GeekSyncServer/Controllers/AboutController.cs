@@ -7,8 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace GeekSyncServer.Controllers
 {
+    [ApiVersion( "0.2" )]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class AboutController : ControllerBase
     {
       
@@ -21,9 +22,18 @@ namespace GeekSyncServer.Controllers
         }
 
         [HttpGet]
+        //[MapToApiVersion("0.2")]
         public String Get()
         {
             return "It's me!";
         }
+/* keeping to not forget how to do this :)
+        [HttpGet]
+        [MapToApiVersion("0.3")]
+        public String Getv0_3()
+        {
+            return "It's me 0.3!";
+        }
+        */
     }
 }
