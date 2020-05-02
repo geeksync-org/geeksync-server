@@ -11,8 +11,9 @@ using GeekSyncServer.Internal;
 
 namespace GeekSyncServer.Controllers
 {
+    [ApiVersion( "0.2" )]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class ChannelController : ControllerBase
     {
       
