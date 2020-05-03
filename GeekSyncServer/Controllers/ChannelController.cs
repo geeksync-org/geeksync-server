@@ -14,6 +14,7 @@ namespace GeekSyncServer.Controllers
     [ApiVersion( "0.2" )]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [Produces("application/json")]
     public class ChannelController : ControllerBase
     {
       
@@ -26,6 +27,9 @@ namespace GeekSyncServer.Controllers
         }
 
         [HttpGet("{channelID}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult Get(Guid channelID)
         {
             Channel channel=ChannelManager.Instance[channelID];
@@ -35,12 +39,15 @@ namespace GeekSyncServer.Controllers
             }
             else
             {
-                return Ok("OK");
+                return Ok();
             }
         }
 
 
         [HttpPut("{channelID}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<string> Register(Guid channelID)
         {
             Channel channel = ChannelManager.Instance[channelID];
@@ -48,14 +55,17 @@ namespace GeekSyncServer.Controllers
             {
                 ChannelManager.Instance.CreateChannel(channelID);
             }
-            return Ok("OK");
+            return Ok();
         }
 
         [HttpDelete("{channelID}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<string> UnRegister(Guid channelID)
         {
             ChannelManager.Instance.DeleteChannel(channelID);
-            return Ok("OK");
+            return Ok();
         }
 
 
@@ -75,7 +85,7 @@ namespace GeekSyncServer.Controllers
             else
             {
                 await channel.SendToReceiver(message);
-                return Ok("OK");
+                return Ok();
             }
             
 
