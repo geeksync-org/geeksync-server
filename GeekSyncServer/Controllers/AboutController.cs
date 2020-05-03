@@ -10,6 +10,7 @@ namespace GeekSyncServer.Controllers
     [ApiVersion( "0.2" )]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [Produces("application/json")]
     public class AboutController : ControllerBase
     {
       
