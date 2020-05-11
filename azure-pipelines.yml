@@ -48,7 +48,6 @@ stages:
            echo "##vso[build.updatebuildnumber]$(major).$(minor).$(patch)"
         name: SetMasterBuildName
 
-
 - stage: Build
   displayName: Build & package
   condition: always()
