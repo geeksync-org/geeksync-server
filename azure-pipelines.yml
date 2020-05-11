@@ -48,7 +48,6 @@ stages:
            echo "##vso[build.updatebuildnumber]$(major).$(minor).$(patch)"
         name: SetMasterBuildName
 
-
 - stage: Build
   displayName: Build & package
   condition: always()
@@ -64,6 +63,8 @@ stages:
         inputs:
           command: 'test'
           testRunTitle: 'Unit test'
+      - script: dotnet pack -p:PackageVersion=$(Build.BuildNumber) --output $(Build.ArtifactStagingDirectory)/nupkgs GeekSyncServer/GeekSyncServer.csproj
+        displayName: Create NuGet package
       - task: CopyFiles@2
         displayName: Copy Dockerfile
         inputs:

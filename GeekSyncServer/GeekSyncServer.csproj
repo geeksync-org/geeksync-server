@@ -7,7 +7,7 @@
     <Version>0.1.0-dev001</Version>
     <UserSecretsId>d1814f44-671f-4681-895f-4027b87e1a59</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
 
