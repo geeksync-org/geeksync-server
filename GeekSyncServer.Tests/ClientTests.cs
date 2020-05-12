@@ -31,9 +31,10 @@ namespace GeekSyncClient.IntegrationTests
 
         }
 
-        [Fact]
+        [Fact (Skip = "Need websocket support")]
         public void ChannelLifecycle()
         {
+            
             Guid ch=Guid.NewGuid();
             var httpClient=_factory.CreateClient();
 
@@ -62,7 +63,7 @@ namespace GeekSyncClient.IntegrationTests
             lastMsg=msg;
         }
 
-        [Fact]
+        [Fact (Skip = "Need websocket support")]
         public void SendAndReceive()
         {
             Guid ch=Guid.NewGuid();
