@@ -21,12 +21,16 @@ namespace GeekSyncServer.Internal
             this.ChannelID = channelID;
         }
         public async Task ConnectWebSocket(WebSocket webSocket)
+        
         {
             if (webSocket != null)
             {
                 // so, we already have one. For now, we just close it...
                 // TODO: check how to close...
-                await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing...", new CancellationTokenSource().Token);
+                // ^^^^^ I think it's bullshit...
+                // await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing...", new CancellationTokenSource().Token);
+                
+
             }
             this.webSocket = webSocket;
             try
