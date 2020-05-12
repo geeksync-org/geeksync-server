@@ -132,10 +132,12 @@ namespace GeekSyncServer
 
             app.Use(async (context, next) =>
                 {
+                    // TOTO: logger: Console.WriteLine("Checking: " +context.Request.Path.ToString() );
                     if (context.Request.Path.ToString().StartsWith("/ws/"))
                     {
                         if (context.WebSockets.IsWebSocketRequest)
                         {
+                            // TOTO: logger: Console.WriteLine("Got WS request on "+context.Request.Path.ToString());
                             WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
                             string[] path = context.Request.Path.ToString().Split('/');

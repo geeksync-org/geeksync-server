@@ -2,7 +2,7 @@ using System;
 using Xunit;
 using GeekSyncServer.Internal;
 
-namespace GeekSyncServer.Tests
+namespace GeekSyncServer.UnitTests
 {
     public class ChannelBasicUnitTest
     {

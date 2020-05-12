@@ -50,6 +50,7 @@ namespace GeekSyncServer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<string> Register(Guid channelID)
         {
+            // TOTO: logger: Console.WriteLine("Got Connect request on "+channelID.ToString());
             Channel channel = ChannelManager.Instance[channelID];
             if (channel == null)
             {
@@ -64,6 +65,7 @@ namespace GeekSyncServer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<string> UnRegister(Guid channelID)
         {
+            // TOTO: logger: Console.WriteLine("Got Disconnect request on "+channelID.ToString());
             ChannelManager.Instance.DeleteChannel(channelID);
             return Ok();
         }
@@ -76,6 +78,10 @@ namespace GeekSyncServer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<string>> Send(Guid channelID, [FromBody] string message)
         {
+            
+            // TOTO: logger: Console.WriteLine("Got Send request on "+channelID.ToString());
+            
+
 
             Channel channel=ChannelManager.Instance[channelID];
             if (channel==null)
