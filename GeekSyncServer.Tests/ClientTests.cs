@@ -4,6 +4,7 @@ using Xunit;
 using System;
 using System.Threading;
 using GeekSyncClient.Client;
+using System.Linq;
 
 namespace GeekSyncClient.IntegrationTests
 {
@@ -23,7 +24,9 @@ namespace GeekSyncClient.IntegrationTests
             Guid ch=Guid.NewGuid();
             var httpClient=_factory.CreateClient();
 
-            SenderClient client=new SenderClient(ch,httpClient.BaseAddress.ToString(),httpClient);
+            ConfigManager config=new ConfigManager(".test.1.conf");
+
+            SenderClient client=new SenderClient(config,config.Config.Peers[0].ChannelID,httpClient.BaseAddress.ToString(),httpClient);
 
             client.CheckIfAvailable();
 
@@ -38,8 +41,10 @@ namespace GeekSyncClient.IntegrationTests
             Guid ch=Guid.NewGuid();
             var httpClient=_factory.CreateClient();
 
-            SenderClient sender=new SenderClient(ch,httpClient.BaseAddress.ToString(),httpClient);
-            ReceiverClient receiver=new ReceiverClient(ch,httpClient.BaseAddress.ToString(),httpClient);
+            ConfigManager config=new ConfigManager(".test.2.conf");
+
+            SenderClient sender=new SenderClient(config,config.Config.Peers[0].ChannelID,httpClient.BaseAddress.ToString(),httpClient);
+            ReceiverClient receiver=new ReceiverClient(config,config.Config.Peers[0].ChannelID,httpClient.BaseAddress.ToString(),httpClient);
 
             sender.CheckIfAvailable();
             Assert.False(sender.IsAvailable);
@@ -66,13 +71,19 @@ namespace GeekSyncClient.IntegrationTests
         [Fact (Skip = "Need websocket support")]
         public void SendAndReceive()
         {
-            Guid ch=Guid.NewGuid();
+           // Guid ch=Guid.NewGuid();
             var httpClient=_factory.CreateClient();
 
             Console.WriteLine("Using SVC URL: "+httpClient.BaseAddress.ToString());
+            ConfigManager rconfig=new ConfigManager(".test.3r.conf");
+            ConfigManager sconfig=new ConfigManager(".test.3s.conf");
 
-            SenderClient sender=new SenderClient(ch,httpClient.BaseAddress.ToString(),httpClient);
-            ReceiverClient receiver=new ReceiverClient(ch,httpClient.BaseAddress.ToString(),httpClient);
+            rconfig.PeerWith(sconfig);
+
+            Guid ch=sconfig.Config.Peers.Single(x=>x.PeerID==rconfig.Config.MyID).ChannelID;
+
+            SenderClient sender=new SenderClient(sconfig,ch,httpClient.BaseAddress.ToString(),httpClient);
+            ReceiverClient receiver=new ReceiverClient(rconfig,ch,httpClient.BaseAddress.ToString(),httpClient);
 
             sender.CheckIfAvailable();
             Assert.False(sender.IsAvailable);
