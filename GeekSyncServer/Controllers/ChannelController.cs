@@ -6,12 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using GeekSyncServer.Internal;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 
 
 namespace GeekSyncServer.Controllers
 {
     [ApiVersion( "0.2" )]
+    [ApiVersion( "0.3" )]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
     [Produces("application/json")]
@@ -76,7 +79,8 @@ namespace GeekSyncServer.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<string>> Send(Guid channelID, [FromBody] string message)
+        [MapToApiVersion("0.2")]
+        public async Task<ActionResult<string>> SendCompat(Guid channelID, [FromBody] string message)
         {
             
             // TOTO: logger: Console.WriteLine("Got Send request on "+channelID.ToString());
@@ -91,6 +95,36 @@ namespace GeekSyncServer.Controllers
             else
             {
                 await channel.SendToReceiver(message);
+                return Ok();
+            }
+            
+
+             
+        }
+        [HttpPost("{channelID}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [MapToApiVersion("0.3")]
+        public async Task<ActionResult<string>> Send(Guid channelID, [FromBody] object message)
+        {
+            
+            // TOTO: logger: Console.WriteLine("Got Send request on "+channelID.ToString());
+            
+
+
+            Channel channel=ChannelManager.Instance[channelID];
+            if (channel==null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                string msg=JsonSerializer.Serialize(message);
+              /*  Console.WriteLine("----");
+                Console.WriteLine(msg);
+                Console.WriteLine("----");*/
+                await channel.SendToReceiver(msg);
                 return Ok();
             }
             

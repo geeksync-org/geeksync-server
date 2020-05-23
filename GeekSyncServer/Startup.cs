@@ -66,7 +66,7 @@ namespace GeekSyncServer
             services.AddApiVersioning(config =>
             {
                 // Specify the default API Version as 1.0
-                config.DefaultApiVersion = new ApiVersion(0, 2);
+                config.DefaultApiVersion = new ApiVersion(0, 3);
                 // If the client hasn't specified the API version in the request, use the default API version number 
                 config.AssumeDefaultVersionWhenUnspecified = true;
                 config.ReportApiVersions = true;
@@ -79,7 +79,7 @@ namespace GeekSyncServer
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v0.2", new OpenApiInfo { Title = "geeksync-server API", Version = "0.2" });
-               // c.SwaggerDoc("v0.3", new OpenApiInfo { Title = "geeksync-server API", Version = "0.3" });
+                c.SwaggerDoc("v0.3", new OpenApiInfo { Title = "geeksync-server API", Version = "0.3" });
 
                 c.OperationFilter<RemoveVersionFromParameter>();
                 c.DocumentFilter<ReplaceVersionWithExactValueInPath>();
@@ -132,7 +132,7 @@ namespace GeekSyncServer
 
             app.Use(async (context, next) =>
                 {
-                    // TOTO: logger: Console.WriteLine("Checking: " +context.Request.Path.ToString() );
+                    // TOTO: logger: Console.WriteLine("Request for: " +context.Request.Path.ToString() );
                     if (context.Request.Path.ToString().StartsWith("/ws/"))
                     {
                         if (context.WebSockets.IsWebSocketRequest)
@@ -178,7 +178,7 @@ namespace GeekSyncServer
             app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v0.2/swagger.json", "geeksync-server API v.0.2");
-                   // c.SwaggerEndpoint("/swagger/v0.3/swagger.json", "geeksync-server API v.0.3");
+                    c.SwaggerEndpoint("/swagger/v0.3/swagger.json", "geeksync-server API v.0.3");
                     c.DisplayOperationId();
                     c.DisplayRequestDuration();
                 });
