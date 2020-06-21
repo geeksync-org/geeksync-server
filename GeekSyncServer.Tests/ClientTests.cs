@@ -5,46 +5,47 @@ using System;
 using System.Threading;
 using GeekSyncClient.Client;
 using System.Linq;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+
 
 namespace GeekSyncClient.IntegrationTests
 {
     public class ClientTests
-        : IClassFixture<WebApplicationFactory<GeekSyncServer.Startup>>
+        : IClassFixture<ServerFixture>
     {
-        private readonly WebApplicationFactory<GeekSyncServer.Startup> _factory;
+        private readonly ServerFixture _fixture;
 
-        public ClientTests(WebApplicationFactory<GeekSyncServer.Startup> factory)
+        public ClientTests(ServerFixture fixture)
         {
-            _factory = factory;
+            _fixture = fixture;
         }
 
         [Fact]
         public void CheckRandomChannel()
         {
-            Guid ch=Guid.NewGuid();
-            var httpClient=_factory.CreateClient();
+            new FileInfo(".test.1.conf").Delete();
+            ConfigManager config = new ConfigManager(".test.1.conf");
 
-            ConfigManager config=new ConfigManager(".test.1.conf");
-
-            SenderClient client=new SenderClient(config,config.Config.Peers[0].ChannelID,httpClient.BaseAddress.ToString(),httpClient);
-
+            SenderClient client = new SenderClient(config, config.Config.Peers[0].ChannelID, "http://localhost:5000/");
             client.CheckIfAvailable();
 
             Assert.False(client.IsAvailable);
+            new FileInfo(".test.1.conf").Delete();
 
         }
 
-        [Fact (Skip = "Need websocket support")]
+        [Fact]
         public void ChannelLifecycle()
         {
-            
-            Guid ch=Guid.NewGuid();
-            var httpClient=_factory.CreateClient();
+            new FileInfo(".test.2.conf").Delete();
 
-            ConfigManager config=new ConfigManager(".test.2.conf");
 
-            SenderClient sender=new SenderClient(config,config.Config.Peers[0].ChannelID,httpClient.BaseAddress.ToString(),httpClient);
-            ReceiverClient receiver=new ReceiverClient(config,config.Config.Peers[0].ChannelID,httpClient.BaseAddress.ToString(),httpClient);
+            ConfigManager config = new ConfigManager(".test.2.conf");
+
+            SenderClient sender = new SenderClient(config, config.Config.Peers[0].ChannelID, "http://localhost:5000/");
+            ReceiverClient receiver = new ReceiverClient(config, config.Config.Peers[0].ChannelID, "http://localhost:5000/");
 
             sender.CheckIfAvailable();
             Assert.False(sender.IsAvailable);
@@ -59,64 +60,88 @@ namespace GeekSyncClient.IntegrationTests
             sender.CheckIfAvailable();
             Assert.False(sender.IsAvailable);
 
+            new FileInfo(".test.2.conf").Delete();
+
         }
 
-        private string lastMsg="";
+        private string lastMsg = "Nothing received.";
 
         void receiverHanlder(string msg)
         {
-            lastMsg=msg;
+            lastMsg = msg;
         }
 
-        [Fact (Skip = "Need websocket support")]
+        [Fact]
         public void SendAndReceive()
         {
-           // Guid ch=Guid.NewGuid();
-            var httpClient=_factory.CreateClient();
+            new FileInfo(".test.3r.conf").Delete();
+            new FileInfo(".test.3s.conf").Delete();
 
-            Console.WriteLine("Using SVC URL: "+httpClient.BaseAddress.ToString());
-            ConfigManager rconfig=new ConfigManager(".test.3r.conf");
-            ConfigManager sconfig=new ConfigManager(".test.3s.conf");
+            ConfigManager rconfig = new ConfigManager(".test.3r.conf");
+            ConfigManager sconfig = new ConfigManager(".test.3s.conf");
 
             rconfig.PeerWith(sconfig);
 
-            Guid ch=sconfig.Config.Peers.Single(x=>x.PeerID==rconfig.Config.MyID).ChannelID;
+            Guid ch = sconfig.Config.Peers.Single(x => x.PeerID == rconfig.Config.MyID).ChannelID;
 
-            SenderClient sender=new SenderClient(sconfig,ch,httpClient.BaseAddress.ToString(),httpClient);
-            ReceiverClient receiver=new ReceiverClient(rconfig,ch,httpClient.BaseAddress.ToString(),httpClient);
+            SenderClient sender = new SenderClient(sconfig, ch, "http://localhost:5000/");
+            ReceiverClient receiver = new ReceiverClient(rconfig, ch, "http://localhost:5000/");
 
             sender.CheckIfAvailable();
             Assert.False(sender.IsAvailable);
 
-            lastMsg="";
+            lastMsg = "";
 
-            receiver.MessageReceived=receiverHanlder;
+            receiver.MessageReceived = receiverHanlder;
 
             receiver.Connect();
-/*
-            Console.WriteLine("Using WS URL: "+receiver.webSocketClient.Url.ToString());
-            Console.WriteLine("  WS IsStarted: "+receiver.webSocketClient.IsStarted.ToString());
-            Console.WriteLine("  WS IsRunning: "+receiver.webSocketClient.IsRunning.ToString());
-            Console.WriteLine("  WS State: "+receiver.webSocketClient.NativeClient.State.ToString());
-*/
-            
+
+
 
             sender.CheckIfAvailable();
             Assert.True(sender.IsAvailable);
 
-            Assert.Equal("",lastMsg);
+            Assert.Equal("", lastMsg);
             sender.SendMessage("TEST MESSAGE");
 
-            Thread.Sleep(10*1000);
+            Thread.Sleep(10 * 1000);
 
-            Assert.Equal("TEST MESSAGE",lastMsg);
+            Assert.Equal("TEST MESSAGE", lastMsg);
 
             receiver.Disconnect();
 
             sender.CheckIfAvailable();
             Assert.False(sender.IsAvailable);
 
+            new FileInfo(".test.3r.conf").Delete();
+            new FileInfo(".test.3s.conf").Delete();
+
         }
 
+    }
+
+    public class ServerFixture : IDisposable
+    {
+        private Task task;
+        private CancellationToken cancellationToken;
+        private CancellationTokenSource cancellationTokenSource;
+        public ServerFixture()
+        {
+            cancellationTokenSource = new CancellationTokenSource();
+            cancellationToken = cancellationTokenSource.Token;
+
+            task = Host.CreateDefaultBuilder(new string[] { })
+                            .ConfigureWebHostDefaults(webBuilder =>
+                            {
+                                webBuilder.UseStartup<GeekSyncServer.Startup>();
+                            }).Build().RunAsync(cancellationToken);
+        }
+
+        public async void Dispose()
+        {
+            cancellationTokenSource.Cancel();
+            await task;
+            task.Dispose();
+        }
     }
 }
